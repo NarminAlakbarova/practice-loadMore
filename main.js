@@ -29,51 +29,45 @@ function drawCard(arr) {
 async function getAllData() {
   let resp = await axios(BASE_URL);
   let data = resp.data;
-  allData = data.slice(0, max);
-  if (sort.innerHTML == "Ascending") {
-    sortedData = allData.sort((a, b) => a.price - b.price);
-    console.log("s");
-  } else if (sort.innerHTML == "Descending") {
-    sortedData = allData.sort((a, b) => b.price - a.price);
-  } else {
-    sortedData = allData;
-  }
-
-  searchedData = searchedData.length|| searchInp.value
-    ? sortedData.filter((item) =>
-        item.name.toLowerCase().includes(searchInp.value.toLowerCase())
-      )
-    : sortedData;
-
-  drawCard(searchedData);
+  allData = data;
+  searchedData = searchInp.value ? searchedData : allData;
+  // console.log(searchedData);
+  // console.log(allData);
+  drawCard(searchedData.slice(0, max));
 }
 getAllData();
 
 loadMoreBtn.addEventListener("click", async function () {
-  let resp = await axios(BASE_URL);
-  let data = resp.data;
-  if (allData.length >= data.length) {
+  max += 4;
+  //  getAllData()
+  if (max >= searchedData.length) {
     loadMoreBtn.style.display = "none";
-  } else {
-    max = max + 4;
-    getAllData();
-    console.log(max);
   }
+  if (searchedData.length) {
+    drawCard(searchedData.slice(0, max));
+  } else {
+    getAllData();
+  }
+  console.log(max);
 });
+
 sort.addEventListener("click", function () {
   if (sort.innerHTML === "Sort") {
+    searchedData = searchedData.sort((a, b) => a.price - b.price);
     sort.innerHTML = "Ascending";
   } else if (sort.innerHTML === "Ascending") {
+    searchedData = searchedData.sort((a, b) => b.price - a.price);
+
     sort.innerHTML = "Descending";
-  } else if (sort.innerHTML === "Descending") {
-    sort.innerHTML = "Sort";
   }
-  getAllData();
+  // getAllData()
+  drawCard(searchedData.slice(0, max));
 });
 
 searchInp.addEventListener("input", function (e) {
-  searchedData = sortedData.filter((item) =>
+  searchedData = allData;
+  searchedData = searchedData.filter((item) =>
     item.name.toLowerCase().includes(e.target.value.toLowerCase())
   );
-  drawCard(searchedData);
+  drawCard(searchedData.slice(0, max));
 });
